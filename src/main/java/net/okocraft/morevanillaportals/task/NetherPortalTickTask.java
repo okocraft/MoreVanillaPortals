@@ -28,7 +28,9 @@ public class NetherPortalTickTask implements Runnable {
     }
 
     public void processPlayer(@NotNull CraftPlayer player) {
-        var world = (CraftWorld) player.getWorld();
+        if (!(player.getWorld() instanceof CraftWorld world)) {
+            return;
+        }
 
         var resourceKey = world.getHandle().getTypeKey() == DimensionType.NETHER_LOCATION ? Level.OVERWORLD : Level.NETHER;
         var server = world.getHandle().getServer();
@@ -66,13 +68,12 @@ public class NetherPortalTickTask implements Runnable {
                 worldNameCache.put(worldName, distWorldName);
             }
 
-            var distWorld = (CraftWorld) Bukkit.getWorld(distWorldName);
-
-            if (distWorld == null) {
+            if (!(Bukkit.getWorld(distWorldName) instanceof CraftWorld distWorld)) {
                 return;
             }
 
             portalTick++;
+
             if (portalTick >= warmup) {
                 var profiler = player.getHandle().getLevel().getProfiler();
                 profiler.push("portal");
