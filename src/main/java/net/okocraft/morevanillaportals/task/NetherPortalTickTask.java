@@ -9,7 +9,16 @@ import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class NetherPortalTickTask implements Runnable {
+
+    private static final String NETHER_SUFFIX = "_nether";
+    private static final int NETHER_SUFFIX_LENGTH = NETHER_SUFFIX.length();
+
+    // world_name -> world_name_nether or world_name_nether -> world_name
+    private final Map<String, String> worldNameCache = new HashMap<>();
 
     @Override
     public void run() {
@@ -37,21 +46,24 @@ public class NetherPortalTickTask implements Runnable {
                 return;
             }
 
-            var distWorldName = switch (world.getEnvironment()) {
-                case NORMAL -> world.getName() + "_nether";
-                case NETHER -> {
-                    var worldName = world.getName();
-                    if (worldName.endsWith("_nether")) {
-                        yield worldName.substring(0, worldName.length() - 7);
-                    } else {
-                        yield null;
-                    }
-                }
-                default -> null;
-            };
+            var worldName = world.getName();
+            String distWorldName;
 
-            if (distWorldName == null || distWorldName.isEmpty()) {
-                return;
+            if (worldNameCache.containsKey(worldName)) {
+                distWorldName = worldNameCache.get(worldName);
+            } else {
+                distWorldName = switch (world.getEnvironment()) {
+                    case NORMAL -> worldName + NETHER_SUFFIX;
+                    case NETHER -> worldName.endsWith(NETHER_SUFFIX) ?
+                            worldName.substring(0, worldName.length() - NETHER_SUFFIX_LENGTH) : null;
+                    default -> null;
+                };
+
+                if (distWorldName == null || distWorldName.isEmpty()) {
+                    return;
+                }
+
+                worldNameCache.put(worldName, distWorldName);
             }
 
             var distWorld = (CraftWorld) Bukkit.getWorld(distWorldName);
