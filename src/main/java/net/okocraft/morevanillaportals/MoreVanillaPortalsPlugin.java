@@ -1,5 +1,6 @@
 package net.okocraft.morevanillaportals;
 
+import net.okocraft.morevanillaportals.listener.EndPortalListener;
 import net.okocraft.morevanillaportals.listener.PlayerListener;
 import net.okocraft.morevanillaportals.task.NetherPortalTickTask;
 import net.okocraft.morevanillaportals.util.PortalTickHolder;
@@ -10,8 +11,9 @@ public class MoreVanillaPortalsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getScheduler().runTaskTimer(this, new NetherPortalTickTask(), 1, 1);
+        getServer().getPluginManager().registerEvents(new EndPortalListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
     @Override
