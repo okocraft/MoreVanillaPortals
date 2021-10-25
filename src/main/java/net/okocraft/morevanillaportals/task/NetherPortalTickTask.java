@@ -3,22 +3,16 @@ package net.okocraft.morevanillaportals.task;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.okocraft.morevanillaportals.util.PortalTickHolder;
+import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class NetherPortalTickTask implements Runnable {
 
-    private static final String NETHER_SUFFIX = "_nether";
-    private static final int NETHER_SUFFIX_LENGTH = NETHER_SUFFIX.length();
-
-    // world_name -> world_name_nether or world_name_nether -> world_name
-    private final Map<String, String> worldNameCache = new HashMap<>();
+    private final WorldNameMap worldNameMap = WorldNameMap.nether();
 
     @Override
     public void run() {
@@ -48,27 +42,10 @@ public class NetherPortalTickTask implements Runnable {
                 return;
             }
 
-            var worldName = world.getName();
-            String distWorldName;
+            var destinationWorldName = worldNameMap.getWorldNameOfPortalDestination(world);
 
-            if (worldNameCache.containsKey(worldName)) {
-                distWorldName = worldNameCache.get(worldName);
-            } else {
-                distWorldName = switch (world.getEnvironment()) {
-                    case NORMAL -> worldName + NETHER_SUFFIX;
-                    case NETHER -> worldName.endsWith(NETHER_SUFFIX) ?
-                            worldName.substring(0, worldName.length() - NETHER_SUFFIX_LENGTH) : null;
-                    default -> null;
-                };
-
-                if (distWorldName == null || distWorldName.isEmpty()) {
-                    return;
-                }
-
-                worldNameCache.put(worldName, distWorldName);
-            }
-
-            if (!(Bukkit.getWorld(distWorldName) instanceof CraftWorld distWorld)) {
+            if (destinationWorldName == null || destinationWorldName.isEmpty() ||
+                    !(Bukkit.getWorld(destinationWorldName) instanceof CraftWorld destination)) {
                 return;
             }
 
@@ -78,7 +55,7 @@ public class NetherPortalTickTask implements Runnable {
                 var profiler = player.getHandle().getLevel().getProfiler();
                 profiler.push("portal");
                 player.getHandle().setPortalCooldown();
-                player.getHandle().changeDimension(distWorld.getHandle(), PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
+                player.getHandle().changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
                 profiler.pop();
             }
 
