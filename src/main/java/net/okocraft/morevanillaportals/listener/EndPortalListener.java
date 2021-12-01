@@ -2,12 +2,12 @@ package net.okocraft.morevanillaportals.listener;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,7 +28,7 @@ public class EndPortalListener implements Listener {
         }
 
         if (event.getBlock().getType() == Material.END_PORTAL) {
-            var resourceKey = world.getHandle().getTypeKey() == DimensionType.END_LOCATION ? Level.OVERWORLD : Level.END;
+            var resourceKey = world.getHandle().getTypeKey() == LevelStem.END ? Level.OVERWORLD : Level.END;
             var server = world.getHandle().getServer();
 
             if (Bukkit.getAllowEnd() && server.getLevel(resourceKey) != null) {

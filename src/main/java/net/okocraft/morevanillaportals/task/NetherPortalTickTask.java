@@ -1,12 +1,12 @@
 package net.okocraft.morevanillaportals.task;
 
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.okocraft.morevanillaportals.util.PortalTickHolder;
 import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,7 @@ public class NetherPortalTickTask implements Runnable {
             return;
         }
 
-        var resourceKey = world.getHandle().getTypeKey() == DimensionType.NETHER_LOCATION ? Level.OVERWORLD : Level.NETHER;
+        var resourceKey = world.getHandle().getTypeKey() == LevelStem.NETHER ? Level.OVERWORLD : Level.NETHER;
         var server = world.getHandle().getServer();
 
         if (server.isNetherEnabled() && server.getLevel(resourceKey) != null) {
