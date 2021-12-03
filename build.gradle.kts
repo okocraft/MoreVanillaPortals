@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     id("io.papermc.paperweight.userdev") version "1.3.0"
-    id("net.minecrell.plugin-yml.bukkit") version "0.5.0"
+    id("net.minecrell.plugin-yml.bukkit") version "0.5.1"
 }
 
 group = "net.okocraft.morevanillaportals"
