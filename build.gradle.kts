@@ -26,7 +26,7 @@ java {
 
 tasks {
     reobfJar {
-        outputJar.convention(
+        outputJar.set(
             project.layout.buildDirectory
                 .file("libs/MoreVanillaPortals-${fullVersion}.jar")
         )
