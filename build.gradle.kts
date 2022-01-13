@@ -7,7 +7,7 @@ plugins {
 group = "net.okocraft.morevanillaportals"
 version = "1.1"
 
-val mcVersion = "1.18.1"
+val mcVersion = "1.17.1"
 val fullVersion = "${version}-mc${mcVersion}"
 
 repositories {
@@ -20,8 +20,8 @@ dependencies {
 
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
 }
 
 tasks {
@@ -38,7 +38,7 @@ tasks {
 
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
+        options.release.set(16)
     }
 
     processResources {
@@ -50,6 +50,6 @@ bukkit {
     name = "MoreVanillaPortals"
     main = "net.okocraft.morevanillaportals.MoreVanillaPortalsPlugin"
     version = fullVersion
-    apiVersion = "1.18"
+    apiVersion = "1.17"
     author = "Siroshun09"
 }
