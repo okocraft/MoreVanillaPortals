@@ -105,7 +105,7 @@ public class PortalListener implements Listener {
         int waitTime = player.isInvulnerable() ? 1 : 80; // Entity#getPortalWaitTime
 
         if (waitTime <= portalTime.incrementAndGet()) {
-            player.setPortalCooldown(300); // Entity#setPortalCooldown
+            player.setPortalCooldown(player.getHandle().getDimensionChangingDelay()); // Entity#setPortalCooldown
             player.getHandle().changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
         }
 
