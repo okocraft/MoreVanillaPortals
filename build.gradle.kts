@@ -50,6 +50,6 @@ bukkit {
     name = "MoreVanillaPortals"
     main = "net.okocraft.morevanillaportals.MoreVanillaPortalsPlugin"
     version = fullVersion
-    apiVersion = "1.18"
+    apiVersion = "1.19"
     author = "Siroshun09"
 }
