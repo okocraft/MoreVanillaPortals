@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "net.okocraft.morevanillaportals"
-version = "1.3"
+version = "1.4"
 
 val mcVersion = "1.18.2"
 val fullVersion = "${version}-mc${mcVersion}"
