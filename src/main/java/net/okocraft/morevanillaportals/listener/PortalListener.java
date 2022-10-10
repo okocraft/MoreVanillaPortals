@@ -1,6 +1,7 @@
 package net.okocraft.morevanillaportals.listener;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
+import io.papermc.paper.event.entity.EntityPortalReadyEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,26 +15,13 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PortalListener implements Listener {
 
     private final WorldNameMap netherMap = WorldNameMap.nether();
     private final WorldNameMap endMap = WorldNameMap.end();
-    private final Map<Player, AtomicInteger> lastTickMap = new HashMap<>();
-    private final Map<Player, AtomicInteger> portalTimeMap = new HashMap<>();
-
-    @EventHandler
-    public void clearCache(@NotNull PlayerQuitEvent event) {
-        lastTickMap.remove(event.getPlayer());
-        portalTimeMap.remove(event.getPlayer());
-    }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void handleInsideEndPortal(@NotNull EntityInsideBlockEvent event) {
@@ -71,69 +59,19 @@ public class PortalListener implements Listener {
         }
     }
 
-    public boolean handleNetherPortal(@NotNull CraftPlayer player) {
-        var destinationWorldName = netherMap.getWorldNameOfPortalDestination(player.getWorld());
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onNetherPortalReady(@NotNull EntityPortalReadyEvent event) {
+        var currentWorld = event.getEntity().getWorld();
+        var destinationWorldName = netherMap.getWorldNameOfPortalDestination(currentWorld);
 
-        if (destinationWorldName == null || destinationWorldName.isEmpty() ||
-                !(Bukkit.getWorld(destinationWorldName) instanceof CraftWorld destination)) {
-            return false;
+        if (destinationWorldName == null || destinationWorldName.isEmpty()) {
+            return;
         }
 
-        var lastTick = lastTickMap.computeIfAbsent(player, p -> new AtomicInteger(-1));
-        var portalTime = portalTimeMap.computeIfAbsent(player, p -> new AtomicInteger(0));
+        var destinationWorld = Bukkit.getWorld(destinationWorldName);
 
-        int elapsed = Bukkit.getCurrentTick() - lastTick.get();
-
-        // prevent multiple counts on the same tick
-        if (elapsed == 0) {
-            return true;
+        if (destinationWorld != null) {
+            event.setTargetWorld(destinationWorld);
         }
-
-        if (lastTick.get() != -1 && 1 < elapsed) {
-            // nms - Entity#handleNetherPortal
-            if (portalTime.get() > 0) {
-                portalTime.addAndGet(elapsed * -4);
-            }
-
-            if (portalTime.get() < 0) {
-                portalTime.set(0);
-            }
-        }
-
-        int waitTime = player.isInvulnerable() ? 1 : 80; // Entity#getPortalWaitTime
-
-        if (waitTime <= portalTime.incrementAndGet()) {
-            player.setPortalCooldown(player.getHandle().getDimensionChangingDelay()); // Entity#setPortalCooldown
-            player.getHandle().changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
-        }
-
-        lastTick.set(Bukkit.getCurrentTick());
-
-        return true;
-    }
-
-    public boolean handleEndPortal(@NotNull CraftPlayer player) {
-        var destinationWorldName = endMap.getWorldNameOfPortalDestination(player.getWorld());
-
-        if (destinationWorldName == null || destinationWorldName.isEmpty() ||
-                !(Bukkit.getWorld(destinationWorldName) instanceof CraftWorld destination)) {
-            return false;
-        }
-
-        // Entity#tickEndPortal
-        player.getHandle().changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.END_PORTAL);
-        return true;
-    }
-
-    private boolean isPortal(@NotNull Block block) {
-        return block.getType() == Material.NETHER_PORTAL || block.getType() == Material.END_PORTAL;
-    }
-
-    private boolean isOverworldOrNether(@NotNull World.Environment environment) {
-        return environment == World.Environment.NORMAL || environment == World.Environment.NETHER;
-    }
-
-    private boolean isOverworldOrEnd(@NotNull World.Environment environment) {
-        return environment == World.Environment.NORMAL || environment == World.Environment.THE_END;
     }
 }
