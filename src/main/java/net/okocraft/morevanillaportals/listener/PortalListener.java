@@ -2,21 +2,27 @@ package net.okocraft.morevanillaportals.listener;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityPortalReadyEvent;
+import java.util.stream.StreamSupport;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PortalListener implements Listener {
 
@@ -25,38 +31,57 @@ public class PortalListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void handleInsideEndPortal(@NotNull EntityInsideBlockEvent event) {
-        if (event.getBlock().getType() != Material.END_PORTAL ||
-                event.getEntity().getWorld().getEnvironment() != World.Environment.NORMAL ||
-                !(event.getBlock() instanceof CraftBlock block) ||
-                !(event.getEntity() instanceof CraftEntity craftEntity) ||
-                !(event.getEntity().getWorld() instanceof CraftWorld world) // EndPortalBlock#entityInside - CraftWorld#getHandle -> ServerLevel
-        ) {
+        var block = event.getBlock();
+        var world = event.getEntity().getWorld();
+        if (block.getType() != Material.END_PORTAL || world.getEnvironment() != World.Environment.NORMAL) {
+            // EndPortalBlock#entityInside - CraftWorld#getHandle -> ServerLevel
+            return;
+        }
+
+        var level = getLevel(world.getKey());
+        if (level == null) {
             return;
         }
 
         // EndPortalBlock#entityInside
-        var entity = craftEntity.getHandle();
-        var pos = block.getPosition();
+        var entity = level.getEntity(event.getEntity().getUniqueId());
+        if (entity == null) {
+            return;
+        }
+        var pos = new BlockPos(block.getLocation().getX(), block.getLocation().getY(), block.getLocation().getZ());
         if (!entity.isPassenger() &&
                 !entity.isVehicle() &&
                 entity.canChangeDimensions() &&
-                Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move((double) (-pos.getX()), (double) (-pos.getY()), (double) (-pos.getZ()))), block.getNMS().getShape(world.getHandle(), pos), BooleanOp.AND)) {
+                Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move((double) (-pos.getX()), (double) (-pos.getY()), (double) (-pos.getZ()))), level.getBlockState(pos).getShape(level, pos), BooleanOp.AND)) {
             var destinationWorldName = endMap.getWorldNameOfPortalDestination(world);
-
-            if (destinationWorldName == null || destinationWorldName.isEmpty() ||
-                    !(Bukkit.getWorld(destinationWorldName) instanceof CraftWorld destination)) {
+            if (destinationWorldName == null || destinationWorldName.isEmpty()) {
+                return;
+            }
+            var destinationWorld = getLevel(destinationWorldName);
+            if (destinationWorld == null) {
                 return;
             }
 
             if (entity instanceof ServerPlayer player) {
-                player.changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.END_PORTAL);
+                player.changeDimension(destinationWorld, PlayerTeleportEvent.TeleportCause.END_PORTAL);
             } else {
                 //noinspection ConstantConditions
-                entity.teleportTo(destination.getHandle(), null);
+                entity.teleportTo(destinationWorld, null);
             }
 
             event.setCancelled(true);
         }
+    }
+
+    private @Nullable ServerLevel getLevel(@NotNull NamespacedKey key) {
+        return MinecraftServer.getServer().getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(key.getNamespace(), key.getKey())));
+    }
+
+    private @Nullable ServerLevel getLevel(@Nullable String levelName) {
+        return StreamSupport.stream(MinecraftServer.getServer().getAllLevels().spliterator(), false)
+                .filter(l -> l.serverLevelData.getLevelName().equals(levelName))
+                .findFirst()
+                .orElse(null);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
