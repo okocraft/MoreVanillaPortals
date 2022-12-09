@@ -6,3 +6,4 @@ jobs:
     uses: okocraft/workflows/.github/workflows/gradle.yml@v1
     with:
       java-version: '17'
+      package-name: MoreVanillaPortals-Build-${{ github.run_number }}
