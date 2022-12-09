@@ -9,9 +9,9 @@ import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,7 +29,7 @@ public class PortalListener implements Listener {
                 event.getEntity().getWorld().getEnvironment() != World.Environment.NORMAL ||
                 !(event.getBlock() instanceof CraftBlock block) ||
                 !(event.getEntity() instanceof CraftEntity craftEntity) ||
-                !(event.getEntity().getWorld() instanceof CraftWorld world) // EndPortalBlock#entityInside - CraftWorld#getHandle -> ServerLevel
+                !(event.getEntity().getWorld() instanceof CraftWorld world)
         ) {
             return;
         }
