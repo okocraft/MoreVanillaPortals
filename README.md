@@ -1,7 +1,7 @@
 # MoreVanillaPortals
 
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/okocraft/MoreVanillaPortals)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/okocraft/MoreVanillaPortals/Build)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/okocraft/MoreVanillaPortals/build.yml?branch=master)
 ![GitHub](https://img.shields.io/github/license/okocraft/MoreVanillaPortals)
 
 ネザーポータルとエンドポータルのバニラ機能を、カスタムワールドでも使えるようにするプラグインです。
