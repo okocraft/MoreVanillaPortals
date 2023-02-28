@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.5.1"
+    id("io.papermc.paperweight.userdev") version "1.5.2"
     id("net.minecrell.plugin-yml.bukkit") version "0.5.3"
 }
 
@@ -15,9 +15,8 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
 }
-
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
