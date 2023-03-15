@@ -37,10 +37,7 @@ public class PortalListener implements Listener {
         // EndPortalBlock#entityInside
         var entity = craftEntity.getHandle();
         var pos = block.getPosition();
-        if (!entity.isPassenger() &&
-                !entity.isVehicle() &&
-                entity.canChangeDimensions() &&
-                Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move((double) (-pos.getX()), (double) (-pos.getY()), (double) (-pos.getZ()))), block.getNMS().getShape(world.getHandle(), pos), BooleanOp.AND)) {
+        if (entity.canChangeDimensions() && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move((double) (-pos.getX()), (double) (-pos.getY()), (double) (-pos.getZ()))), block.getNMS().getShape(world.getHandle(), pos), BooleanOp.AND)) {
             var destinationWorldName = endMap.getWorldNameOfPortalDestination(world);
 
             if (destinationWorldName == null || destinationWorldName.isEmpty() ||
