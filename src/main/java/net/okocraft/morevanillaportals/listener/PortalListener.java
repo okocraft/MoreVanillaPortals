@@ -7,6 +7,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.okocraft.morevanillaportals.util.WorldNameMap;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
@@ -15,6 +16,7 @@ import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,6 +46,9 @@ public class PortalListener implements Listener {
                     !(Bukkit.getWorld(destinationWorldName) instanceof CraftWorld destination)) {
                 return;
             }
+
+            // Entity#tickEndPortal
+            new EntityPortalEnterEvent(craftEntity, new Location(world, pos.getX(), pos.getY(), pos.getZ())).callEvent();
 
             if (entity instanceof ServerPlayer player) {
                 player.changeDimension(destination.getHandle(), PlayerTeleportEvent.TeleportCause.END_PORTAL);
