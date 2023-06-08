@@ -7,7 +7,7 @@ plugins {
 group = "net.okocraft.morevanillaportals"
 version = "1.6"
 
-val mcVersion = "1.19.4"
+val mcVersion = "1.20"
 val fullVersion = "${version}-mc${mcVersion}"
 
 repositories {
@@ -49,6 +49,6 @@ bukkit {
     name = "MoreVanillaPortals"
     main = "net.okocraft.morevanillaportals.MoreVanillaPortalsPlugin"
     version = fullVersion
-    apiVersion = "1.19"
+    apiVersion = "1.20"
     author = "Siroshun09"
 }
