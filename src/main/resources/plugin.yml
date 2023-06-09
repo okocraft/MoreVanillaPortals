@@ -1,0 +1,5 @@
+name: MoreVanillaPortals
+version: "${projectVersion}"
+main: net.okocraft.morevanillaportals.MoreVanillaPortalsPlugin
+author: Siroshun09
+api-version: "1.20"
