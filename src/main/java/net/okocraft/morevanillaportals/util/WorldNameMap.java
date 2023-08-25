@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class WorldNameMap {
 
@@ -16,13 +17,13 @@ public final class WorldNameMap {
     private final World.Environment environment;
     private final String dimensionSuffix;
     private final int dimensionSuffixLength;
-
-    private final Map<String, String> worldNameCache = new HashMap<>();
+    private final Map<String, String> worldNameCache;
 
     private WorldNameMap(@NotNull World.Environment environment, @NotNull String dimensionSuffix) {
         this.environment = environment;
         this.dimensionSuffix = dimensionSuffix;
         this.dimensionSuffixLength = dimensionSuffix.length();
+        this.worldNameCache = FoliaChecker.IS_FOLIA ? new ConcurrentHashMap<>() : new HashMap<>();
     }
 
     @Contract(" -> new")
