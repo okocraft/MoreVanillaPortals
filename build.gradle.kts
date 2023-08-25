@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("$mcVersion-R0.1-SNAPSHOT")
 }
 
 java {
