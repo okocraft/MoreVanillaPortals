@@ -25,13 +25,6 @@ java {
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks {
-    reobfJar {
-        outputJar.set(
-            project.layout.buildDirectory
-                .file("libs/MoreVanillaPortals-${fullVersion}.jar")
-        )
-    }
-
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(21)
@@ -42,5 +35,9 @@ tasks {
         filesMatching("plugin.yml") {
             expand("projectVersion" to version)
         }
+    }
+
+    jar {
+        archiveFileName = "MoreVanillaPortals-${fullVersion}.jar"
     }
 }
