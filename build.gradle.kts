@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.6.0"
+    id("io.papermc.paperweight.userdev") version "1.6.2"
 }
 
 group = "net.okocraft.morevanillaportals"
