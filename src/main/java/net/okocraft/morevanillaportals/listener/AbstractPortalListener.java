@@ -3,6 +3,7 @@ package net.okocraft.morevanillaportals.listener;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityPortalReadyEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.okocraft.morevanillaportals.util.WorldNameMap;
@@ -14,17 +15,26 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 abstract class AbstractPortalListener implements Listener {
 
+    private final Plugin plugin;
+    private final Set<UUID> teleportingByEndPortal;
     protected final WorldNameMap netherMap;
     protected final WorldNameMap endMap;
 
-    protected AbstractPortalListener(boolean useConcurrentMap) {
+    protected AbstractPortalListener(@NotNull Plugin plugin, boolean useConcurrentMap) {
+        this.plugin = plugin;
+        this.teleportingByEndPortal = useConcurrentMap ? ConcurrentHashMap.newKeySet() : new HashSet<>();
         this.netherMap = WorldNameMap.nether(useConcurrentMap);
         this.endMap = WorldNameMap.end(useConcurrentMap);
     }
@@ -58,11 +68,6 @@ abstract class AbstractPortalListener implements Listener {
             return;
         }
 
-        if (!this.canTeleportByEndPortal(craftEntity)) { // Prevent scheduling teleport task twice
-            event.setCancelled(true);
-            return;
-        }
-
         // EndPortalBlock#entityInside
         var entity = craftEntity.getHandle();
         var pos = block.getPosition();
@@ -78,14 +83,25 @@ abstract class AbstractPortalListener implements Listener {
             return;
         }
 
-        // Entity#tickEndPortal
-        new EntityPortalEnterEvent(craftEntity, new Location(world, pos.getX(), pos.getY(), pos.getZ())).callEvent();
-
         event.setCancelled(true);
-        this.teleportByEndPortal(entity, destination.getHandle());
+        var entityUUID = entity.getUUID();
+
+        if (this.teleportingByEndPortal.add(entityUUID)) {
+            var worldUid = destination.getUID();
+            new EntityPortalEnterEvent(craftEntity, new Location(world, pos.getX(), pos.getY(), pos.getZ())).callEvent();
+            entity.getBukkitEntity().getScheduler().run(
+                    this.plugin,
+                    $ -> this.teleportByEndPortal(entity, worldUid),
+                    () -> this.teleportingByEndPortal.remove(entityUUID)
+            );
+        }
     }
 
-    protected abstract boolean canTeleportByEndPortal(@NotNull Entity entity);
+    protected abstract void teleportByEndPortal(@NotNull Entity entity, @NotNull ServerLevel destination);
 
-    protected abstract void teleportByEndPortal(@NotNull net.minecraft.world.entity.Entity entity, @NotNull ServerLevel destination);
+    private void teleportByEndPortal(@NotNull Entity entity, @NotNull UUID destinationWorldUuid) {
+        if (this.teleportingByEndPortal.remove(entity.getUUID()) && entity.canChangeDimensions() && Bukkit.getWorld(destinationWorldUuid) instanceof CraftWorld destination) {
+            this.teleportByEndPortal(entity, destination.getHandle());
+        }
+    }
 }

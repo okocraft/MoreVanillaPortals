@@ -4,16 +4,17 @@ import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityPortalReadyEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import org.bukkit.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 public class PaperPortalListener extends AbstractPortalListener {
 
-    public PaperPortalListener() {
-        super(false);
+    public PaperPortalListener(@NotNull Plugin plugin) {
+        super(plugin, false);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -27,12 +28,7 @@ public class PaperPortalListener extends AbstractPortalListener {
     }
 
     @Override
-    protected boolean canTeleportByEndPortal(@NotNull Entity entity) {
-        return true;
-    }
-
-    @Override
-    protected void teleportByEndPortal(@NotNull net.minecraft.world.entity.Entity entity, @NotNull ServerLevel destination) {
+    protected void teleportByEndPortal(@NotNull Entity entity, @NotNull ServerLevel destination) {
         if (entity instanceof ServerPlayer player) {
             player.changeDimension(destination, PlayerTeleportEvent.TeleportCause.END_PORTAL);
         } else {

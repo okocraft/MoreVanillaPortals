@@ -26,7 +26,7 @@ public class MoreVanillaPortalsPlugin extends JavaPlugin {
             this.getSLF4JLogger().info("In normal Folia, nether portals will not be working by this plugin.");
             return new FoliaPortalListener(this);
         } catch (ClassNotFoundException e) {
-            return new PaperPortalListener();
+            return new PaperPortalListener(this);
         }
     }
 }

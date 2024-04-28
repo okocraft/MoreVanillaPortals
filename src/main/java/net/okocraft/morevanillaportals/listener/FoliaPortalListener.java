@@ -3,9 +3,7 @@ package net.okocraft.morevanillaportals.listener;
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityPortalReadyEvent;
 import net.minecraft.server.level.ServerLevel;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.Plugin;
@@ -13,9 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class FoliaPortalListener extends AbstractPortalListener {
@@ -45,10 +40,9 @@ public class FoliaPortalListener extends AbstractPortalListener {
     }
 
     private final Plugin plugin;
-    private final Set<UUID> teleportingByEndPortal = ConcurrentHashMap.newKeySet();
 
     public FoliaPortalListener(@NotNull Plugin plugin) {
-        super(true);
+        super(plugin, true);
         this.plugin = plugin;
     }
 
@@ -63,34 +57,11 @@ public class FoliaPortalListener extends AbstractPortalListener {
     }
 
     @Override
-    protected boolean canTeleportByEndPortal(@NotNull Entity entity) {
-        return !this.teleportingByEndPortal.contains(entity.getUniqueId());
-    }
-
-    @Override
-    protected void teleportByEndPortal(@NotNull net.minecraft.world.entity.Entity entity, @NotNull ServerLevel destination) {
-        var entityUUID = entity.getUUID();
-        var worldUid = destination.uuid;
-        this.teleportingByEndPortal.add(entityUUID);
-
-        // Teleports the entity in the next tick because of world mismatches
-        entity.getBukkitEntity().getScheduler().run(
-                this.plugin,
-                $ -> this.callPortalToAsyncWithEndPortal(entity, worldUid),
-                () -> this.teleportingByEndPortal.remove(entityUUID)
-        );
-    }
-
-    // Entity#endPortalLogicAsync
-    private void callPortalToAsyncWithEndPortal(@NotNull net.minecraft.world.entity.Entity entity, @NotNull UUID destinationWorldUuid) {
-        if (!this.teleportingByEndPortal.remove(entity.getUUID()) || !entity.canChangeDimensions() || !(Bukkit.getWorld(destinationWorldUuid) instanceof CraftWorld destination)) {
-            return;
-        }
-
+    protected void teleportByEndPortal(@NotNull Entity entity, @NotNull ServerLevel destination) {
         // Entity#tryEndPortal
         // Entity#endPortalLogicAsync
         try {
-            PORTAL_TO_ASYNC_METHOD.invoke(entity, destination.getHandle(), false, END_PORTAL_TYPE, null);
+            PORTAL_TO_ASYNC_METHOD.invoke(entity, destination, false, END_PORTAL_TYPE, null);
         } catch (IllegalAccessException | InvocationTargetException e) {
             this.plugin.getSLF4JLogger().error("Failed to teleport entity (type: {}, uuid: {}) by the end portal.", entity.getType(), entity.getUUID());
         }
