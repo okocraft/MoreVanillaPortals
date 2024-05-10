@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class WorldNameMap {
 
@@ -17,22 +18,27 @@ public final class WorldNameMap {
     private final String dimensionSuffix;
     private final int dimensionSuffixLength;
 
-    private final Map<String, String> worldNameCache = new HashMap<>();
+    private final Map<String, String> worldNameCache;
 
-    private WorldNameMap(@NotNull World.Environment environment, @NotNull String dimensionSuffix) {
+    private WorldNameMap(@NotNull World.Environment environment, @NotNull String dimensionSuffix, @NotNull Map<String, String> worldNameCache) {
         this.environment = environment;
         this.dimensionSuffix = dimensionSuffix;
         this.dimensionSuffixLength = dimensionSuffix.length();
+        this.worldNameCache = worldNameCache;
     }
 
-    @Contract(" -> new")
-    public static @NotNull WorldNameMap nether() {
-        return new WorldNameMap(World.Environment.NETHER, NETHER_SUFFIX);
+    @Contract("_ -> new")
+    public static @NotNull WorldNameMap nether(boolean useConcurrentMap) {
+        return new WorldNameMap(World.Environment.NETHER, NETHER_SUFFIX, createMap(useConcurrentMap));
     }
 
-    @Contract(" -> new")
-    public static @NotNull WorldNameMap end() {
-        return new WorldNameMap(World.Environment.THE_END, THE_END_SUFFIX);
+    @Contract("_ -> new")
+    public static @NotNull WorldNameMap end(boolean useConcurrentMap) {
+        return new WorldNameMap(World.Environment.THE_END, THE_END_SUFFIX, createMap(useConcurrentMap));
+    }
+
+    private static @NotNull Map<String, String> createMap(boolean useConcurrentMap) {
+        return useConcurrentMap ? new ConcurrentHashMap<>() : new HashMap<>();
     }
 
     public @Nullable String getWorldNameOfPortalDestination(@NotNull World world) {

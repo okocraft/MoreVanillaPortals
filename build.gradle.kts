@@ -1,12 +1,12 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.5.15"
+    id("io.papermc.paperweight.userdev") version "1.7.0"
 }
 
 group = "net.okocraft.morevanillaportals"
 version = "1.7"
 
-val mcVersion = "1.20.4"
+val mcVersion = "1.20.6"
 val fullVersion = "${version}-mc${mcVersion}"
 
 repositories {
@@ -18,25 +18,16 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
+
 tasks {
-    reobfJar {
-        outputJar.set(
-            project.layout.buildDirectory
-                .file("libs/MoreVanillaPortals-${fullVersion}.jar")
-        )
-    }
-
-    build {
-        dependsOn(reobfJar)
-    }
-
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
+        options.release.set(21)
     }
 
     processResources {
@@ -44,5 +35,9 @@ tasks {
         filesMatching("plugin.yml") {
             expand("projectVersion" to version)
         }
+    }
+
+    jar {
+        archiveFileName = "MoreVanillaPortals-${fullVersion}.jar"
     }
 }
