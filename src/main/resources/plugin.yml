@@ -3,3 +3,4 @@ version: "${projectVersion}"
 main: net.okocraft.morevanillaportals.MoreVanillaPortalsPlugin
 author: Siroshun09
 api-version: "1.20"
+folia-supported: true
