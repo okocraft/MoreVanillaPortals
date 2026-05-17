@@ -1,33 +1,31 @@
 plugins {
     `java-library`
-    id("io.papermc.paperweight.userdev") version "1.7.2"
 }
 
 group = "net.okocraft.morevanillaportals"
 version = "1.7"
 
-val mcVersion = "1.20.6"
+val mcVersion = libs.versions.paper.get().replaceAfter(".build", "").removeSuffix(".build")
 val fullVersion = "${version}-mc${mcVersion}"
 
 repositories {
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    compileOnly(libs.paper.api)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
-
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(21)
+        options.release.set(25)
     }
 
     processResources {
